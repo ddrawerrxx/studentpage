@@ -5,36 +5,37 @@ include "dbcon.php";
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = trim($_POST["email"]);
-    $password = $_POST["password"];
+  $email = trim($_POST["email"]);
+  $password = $_POST["password"];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+  $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+  $stmt->bind_param("s", $email);
+  $stmt->execute();
+  $result = $stmt->get_result();
 
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
+  if ($result->num_rows === 1) {
+      $user = $result->fetch_assoc();
 
-        // Plaintext password comparison (development only)
-        if ($password === $user['password']) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['email'] = $user['email'];
-            $_SESSION['username'] = $user['fullname'];
-            $_SESSION['role'] = $user['role'] ?? 'student';
+      // Secure password verification
+      if (password_verify($password, $user['password'])) {
+          $_SESSION['user_id'] = $user['id'];
+          $_SESSION['email'] = $user['email'];
+          $_SESSION['username'] = $user['fullname'];
+          $_SESSION['role'] = $user['role'] ?? 'student';
 
-            if ($_SESSION['role'] === 'admin') {
-                header("Location: admin\admindashboard.php");
-            } else {
-                header("Location: user\homepage.php");
-            }
-            exit();
-        } else {
-            $error = "Incorrect password.";
-        }
-    } else {
-        $error = "Email not found.";
-    }
+          if ($_SESSION['role'] === 'admin') {
+              header("Location: admin/admindashboard.php");
+          } else {
+              header("Location: user/homepage.php");
+          }
+          exit();
+      } else {
+          $error = "Incorrect password.";
+      }
+  } else {
+      $error = "Email not found.";
+  }
+
 }
 ?>
 <!DOCTYPE html>
@@ -168,9 +169,54 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       text-align: center;
       font-size: 0.95rem;
     }
+    #toastBox {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        background-color: #1BCD80;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        min-width: 200px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    }
+
+    .toast.error {
+        background-color: #e74c3c;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
   </style>
 </head>
 <body>
+  <div id="toastBox"></div>
   <div class="login-container">
     <!-- Left Side Image -->
     <div class="login-image">
@@ -200,5 +246,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>
     </div>
   </div>
+  <script>
+    let toastBox = document.getElementById('toastBox');
+    let successMess = '<i class="fa-solid fa-circle-check"></i>Account Created Successful!';
+
+    function showToast(msg) {
+        let toast = document.createElement('div'); 
+        toast.classList.add('toast');
+        toast.innerHTML = msg;
+        toastBox.appendChild(toast); 
+
+        if (msg.includes('error')) {
+            toast.classList.add('error');
+        }
+
+        // Play notification sound
+        const sound = document.getElementById('notifySound');
+        if (sound) sound.play();
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('status') === 'success') {
+        showToast(successMess);
+        window.history.replaceState(null, null, window.location.pathname);
+    }
+  </script>
 </body>
 </html>

@@ -10,23 +10,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $email = trim($_POST['email']);
   $password = $_POST['password'];
   $confirm_password = $_POST['confirm_password'];
-  
 
-  if ($password !== $confirm_password) {
+  // Field validation
+  if (empty($fullname) || empty($email) || empty($password) || empty($confirm_password)) {
+    $signup_error = "All fields are required.";
+  } elseif ($password !== $confirm_password) {
     $signup_error = "Passwords do not match.";
-  }     if (empty($email) || empty($fullname) || empty($password) || empty($confirmPassword)) {
-        echo "All fields are required.";
-    }
-
-    if (strlen($password) < 8){
-      echo "Mali pass baks hindi eight.";
-    } else {
-      echo "valid ka baks, nice!";
-    }
-    if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', subject: $password)) {
-        echo "Password must be at least 8 characters long and include at least one uppercase letter, a lowercase letter, a number, and a special character.";
-    }
-else {
+  } elseif (strlen($password) < 8) {
+    $signup_error = "Password must be at least 8 characters long.";
+  } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])/', $password)) {
+    $signup_error = "Password must contain uppercase, lowercase, number, and special character.";
+  } else {
     // Check if email already exists
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
@@ -36,12 +30,14 @@ else {
     if ($result->num_rows > 0) {
       $signup_error = "Email already registered.";
     } else {
-      // Insert user with default role: 'student'
+      // Insert new user (role defaults to 'student')
+      $hashed_password = password_hash($password, PASSWORD_DEFAULT);
       $stmt = $conn->prepare("INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, 'student')");
-      $stmt->bind_param("sss", $fullname, $email, $password);
+      $stmt->bind_param("sss", $fullname, $email, $hashed_password);
 
       if ($stmt->execute()) {
-        header("Location: ../login.php");
+        $signup_success = "Account created successfully!";
+        header("Location: ../login.php?status=success");
         exit();
       } else {
         $signup_error = "Something went wrong. Please try again.";
@@ -52,6 +48,7 @@ else {
   }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -203,7 +200,14 @@ else {
         <form action="signup.php" method="POST">
           <input type="text" name="fullname" placeholder="Full Name" required />
           <input type="email" name="email" placeholder="Email Address" required />
-          <input type="password" name="password" placeholder="Password" required />
+          <input type="password" id="password" name="password" placeholder="Password" required oninput="checkPasswordStrength()" />
+          <ul id="password-requirements" style="text-align: left; font-size: 0.9rem; margin-top: -15px; margin-bottom: 15px; color: #888;">
+            <li id="length" style="color: red;">❌ At least 8 characters</li>
+            <li id="uppercase" style="color: red;">❌ At least one uppercase letter</li>
+            <li id="lowercase" style="color: red;">❌ At least one lowercase letter</li>
+            <li id="number" style="color: red;">❌ At least one number</li>
+            <li id="special" style="color: red;">❌ At least one special character (@$!%*?&)</li>
+          </ul>
           <input type="password" name="confirm_password" placeholder="Confirm Password" required />
           <p>Already have an account? <a href="../login.php">Sign In</a></p>
           <button type="submit">Sign Up</button>
@@ -221,5 +225,62 @@ else {
       <img src="../Images/library-signup.png" alt="Library Sign Up" />
     </div>
   </div>
+  <script>
+  function checkPasswordStrength() {
+    const password = document.getElementById("password").value;
+
+    const length = document.getElementById("length");
+    const uppercase = document.getElementById("uppercase");
+    const lowercase = document.getElementById("lowercase");
+    const number = document.getElementById("number");
+    const special = document.getElementById("special");
+
+    // Check length
+    if (password.length >= 8) {
+      length.textContent = "✅ At least 8 characters";
+      length.style.color = "green";
+    } else {
+      length.textContent = "❌ At least 8 characters";
+      length.style.color = "red";
+    }
+
+    // Check uppercase
+    if (/[A-Z]/.test(password)) {
+      uppercase.textContent = "✅ At least one uppercase letter";
+      uppercase.style.color = "green";
+    } else {
+      uppercase.textContent = "❌ At least one uppercase letter";
+      uppercase.style.color = "red";
+    }
+
+    // Check lowercase
+    if (/[a-z]/.test(password)) {
+      lowercase.textContent = "✅ At least one lowercase letter";
+      lowercase.style.color = "green";
+    } else {
+      lowercase.textContent = "❌ At least one lowercase letter";
+      lowercase.style.color = "red";
+    }
+
+    // Check number
+    if (/\d/.test(password)) {
+      number.textContent = "✅ At least one number";
+      number.style.color = "green";
+    } else {
+      number.textContent = "❌ At least one number";
+      number.style.color = "red";
+    }
+
+    // Check special character
+    if (/[@$!%*?&]/.test(password)) {
+      special.textContent = "✅ At least one special character (@$!%*?&)";
+      special.style.color = "green";
+    } else {
+      special.textContent = "❌ At least one special character (@$!%*?&)";
+      special.style.color = "red";
+    }
+  }
+</script>
+
 </body>
 </html>
