@@ -9,7 +9,15 @@
   <title>Admin Users Page</title>
   <link rel="stylesheet" href="../css/AdminUserPage.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      font-family: 'Poppins', sans-serif;
+
+    }
+  </style>
 </head>
 
 <body>
@@ -40,28 +48,28 @@
 
       <div class="users-content">
         <h2 class="section-title">USERS</h2>
-         <!-- Add this above your table -->
-          <div class="table-filters">
-            <div class="filter-group">
-              <label for="name-filter">Name:</label>
-              <input type="text" id="name-filter" placeholder="Filter by name...">
-            </div>
-            <div class="filter-group">
-              <label for="book-filter">Book:</label>
-              <input type="text" id="book-filter" placeholder="Filter by book...">
-            </div>
-            <div class="filter-group">
-              <label for="status-filter">Status:</label>
-              <select id="status-filter">
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="borrowed">Borrowed</option>
-                <option value="returned">Returned</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-            <button id="reset-filters" class="filter-btn">Reset Filters</button>
+        <!-- Add this above your table -->
+        <div class="table-filters">
+          <div class="filter-group">
+            <label for="name-filter">Name:</label>
+            <input type="text" id="name-filter" placeholder="Filter by name...">
           </div>
+          <div class="filter-group">
+            <label for="book-filter">Book:</label>
+            <input type="text" id="book-filter" placeholder="Filter by book...">
+          </div>
+          <div class="filter-group">
+            <label for="status-filter">Status:</label>
+            <select id="status-filter">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="borrowed">Borrowed</option>
+              <option value="returned">Returned</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <button id="reset-filters" class="filter-btn">Reset Filters</button>
+        </div>
         <div class="users-table">
           <table>
             <thead>
@@ -285,59 +293,59 @@
     }
   </script>
   <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Get filter elements
-  const nameFilter = document.getElementById('name-filter');
-  const bookFilter = document.getElementById('book-filter');
-  const statusFilter = document.getElementById('status-filter');
-  const resetBtn = document.getElementById('reset-filters');
-  const tableRows = document.querySelectorAll('tbody tr');
-  
-  // Filter function
-  function applyFilters() {
-    const nameValue = nameFilter.value.toLowerCase();
-    const bookValue = bookFilter.value.toLowerCase();
-    const statusValue = statusFilter.value.toLowerCase();
-    
-    tableRows.forEach(row => {
-      const name = row.cells[0].textContent.toLowerCase();
-      const book = row.cells[2].textContent.toLowerCase();
-      const status = row.cells[6].textContent.toLowerCase();
-      
-      const nameMatch = name.includes(nameValue);
-      const bookMatch = book.includes(bookValue);
-      const statusMatch = statusValue === '' || status === statusValue;
-      
-      if (nameMatch && bookMatch && statusMatch) {
-        row.style.display = '';
-        row.classList.add('filter-match');
-      } else {
-        row.style.display = 'none';
-        row.classList.remove('filter-match');
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get filter elements
+      const nameFilter = document.getElementById('name-filter');
+      const bookFilter = document.getElementById('book-filter');
+      const statusFilter = document.getElementById('status-filter');
+      const resetBtn = document.getElementById('reset-filters');
+      const tableRows = document.querySelectorAll('tbody tr');
+
+      // Filter function
+      function applyFilters() {
+        const nameValue = nameFilter.value.toLowerCase();
+        const bookValue = bookFilter.value.toLowerCase();
+        const statusValue = statusFilter.value.toLowerCase();
+
+        tableRows.forEach(row => {
+          const name = row.cells[0].textContent.toLowerCase();
+          const book = row.cells[2].textContent.toLowerCase();
+          const status = row.cells[6].textContent.toLowerCase();
+
+          const nameMatch = name.includes(nameValue);
+          const bookMatch = book.includes(bookValue);
+          const statusMatch = statusValue === '' || status === statusValue;
+
+          if (nameMatch && bookMatch && statusMatch) {
+            row.style.display = '';
+            row.classList.add('filter-match');
+          } else {
+            row.style.display = 'none';
+            row.classList.remove('filter-match');
+          }
+        });
       }
+
+      // Event listeners
+      nameFilter.addEventListener('input', applyFilters);
+      bookFilter.addEventListener('input', applyFilters);
+      statusFilter.addEventListener('change', applyFilters);
+
+      // Reset filters
+      resetBtn.addEventListener('click', function() {
+        nameFilter.value = '';
+        bookFilter.value = '';
+        statusFilter.value = '';
+        tableRows.forEach(row => {
+          row.style.display = '';
+          row.classList.remove('filter-match');
+        });
+      });
+
+      // Initialize filters
+      applyFilters();
     });
-  }
-  
-  // Event listeners
-  nameFilter.addEventListener('input', applyFilters);
-  bookFilter.addEventListener('input', applyFilters);
-  statusFilter.addEventListener('change', applyFilters);
-  
-  // Reset filters
-  resetBtn.addEventListener('click', function() {
-    nameFilter.value = '';
-    bookFilter.value = '';
-    statusFilter.value = '';
-    tableRows.forEach(row => {
-      row.style.display = '';
-      row.classList.remove('filter-match');
-    });
-  });
-  
-  // Initialize filters
-  applyFilters();
-});
-</script>
+  </script>
 </body>
 
 </html>
