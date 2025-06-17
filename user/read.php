@@ -6,7 +6,7 @@ $isbn = $_GET['id'] ?? '';
 $isbn = mysqli_real_escape_string($conn, $isbn);
 
 // Fetch book by ISBN
-$query = "SELECT * FROM books WHERE isbn = '$isbn'";
+$query = "SELECT * FROM books WHERE id = '$isbn'";
 $result = mysqli_query($conn, $query);
 $book = mysqli_fetch_assoc($result);
 
@@ -16,7 +16,6 @@ if (!$book) {
     exit;
 }
 
-$pdf_file = htmlspecialchars($book['pdf_file']);
 ?>
 
 <!DOCTYPE html>
@@ -26,11 +25,13 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
   <title><?= htmlspecialchars($book['title']) ?> - Read</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
       height: 100%;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #fdfaf7;
     }
 
@@ -279,15 +280,15 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="logo" onclick="toggleSidebar()">
-      <img src="/Images/logo.png" alt="Readly Logo" />
+      <img src="../Images/logo.png" alt="Readly Logo" />
     </div>
     <nav class="nav">
-      <a href="dashboard.php"><img class="icon" src="/Images/dashboard.png" alt="Dashboard Icon" /><span>Dashboard</span></a>
-      <a href="library.php"><img class="icon" src="/Images/Library.png" alt="Library Icon" /><span>Library</span></a>
-      <a href="book_details.php"><img class="icon" src="/Images/Details.png" alt="Details Icon" /><span>Book Details</span></a>
-      <a href="track.php"><img class="icon" src="/Images/Track.png" alt="Track Icon" /><span>Track and Record</span></a>
-      <a href="support.php"><img class="icon" src="/Images/Support.png" alt="Support Icon" /><span>Support Page</span></a>
-      <a href="settings.php"><img class="icon" src="/Images/Settings.png" alt="Settings Icon" /><span>Settings</span></a>       
+      <a href="homepage.php"><img class="icon" src="../Images/dashboard.png" alt="Dashboard Icon" /><span>Dashboard</span></a>
+      <a href="librarypage.php"><img class="icon" src="../Images/Library.png" alt="Library Icon" /><span>Library</span></a>
+      <a href="Book-Details.php"><img class="icon" src="../Images/Details.png" alt="Details Icon" /><span>Book Details</span></a>
+      <a href="track.php"><img class="icon" src="../Images/Track.png" alt="Track Icon" /><span>Track and Record</span></a>
+      <a href="support.php"><img class="icon" src="../Images/Support.png" alt="Support Icon" /><span>Support Page</span></a>
+      <a href="settings.php"><img class="icon" src="../Images/Settings.png" alt="Settings Icon" /><span>Settings</span></a>       
     </nav>
     <div class="sign-out">
       <a href="logout.php"><img class="icon" src="/Images/signout.png" alt="Sign Out Icon" /><span>Sign Out</span></a>
@@ -299,8 +300,7 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
     <div class="topbar">
       <div class="left"><span>READLY</span></div>
       <div class="right">
-        <img src="/Images/notif.png" alt="Notifications">
-        <img src="/Images/profile.png" alt="Profile">
+        <img src="../Images/profile.png" alt="Profile">
       </div>
     </div>
 
@@ -309,15 +309,8 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
         <div class="book-title"><?= htmlspecialchars($book['title']) ?></div>
         <div class="author">Author: <?= htmlspecialchars($book['author']) ?></div>
         <br>
-        <a href="book_details.php"><button>Back to Book Details</button></a>
+        <a href="Book-Details.php"><button>Back to Book Details</button></a>
         <button onclick="openBorrowForm('<?= htmlspecialchars($book['title']) ?>')">Borrow Book</button>
-      </div>
-
-      <?php if (!empty($pdf_file) && file_exists($pdf_file)): ?>
-        <iframe src="<?= $pdf_file ?>"></iframe>
-      <?php else: ?>
-        <p style="color: red;">Sorry, the PDF for this book is not available.</p>
-      <?php endif; ?>
     </div>
   </div>
 </div>
@@ -325,13 +318,16 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
 <!-- Borrow Form Popup -->
 <div id="borrowPopup">
   <form class="borrow-form" action="submit_borrow.php" method="POST">
-    <img src="/Images/logo.png" alt="Readly">
+    <img src="../Images/logo.png" alt="Readly">
     <h2>Fill up the following</h2>
-    <input type="text" name="user_id" placeholder="User ID" required>
+    <input type="text" id="user_id" name="user_id" placeholder="User ID" required>
     <input type="email" name="email" placeholder="Email" required>
     <input type="text" name="book_title" id="bookTitle" placeholder="Book Title" readonly>
-    <input type="date" name="date" required>
-    <input type="text" name="contact" placeholder="Contact" required>
+    <label for="borrow-date" style="display:block; margin-top: 10px; font-weight: bold;">
+      Select the return date (up to 7 days from today)
+    </label>
+    <input type="date" id="borrow-date" name="date" required title="Choose the return date – maximum of 7 days from today">
+    <input type="text" name="contact" class="contact_num" placeholder="Contact" required>
     <input type="hidden" name="isbn" value="<?= htmlspecialchars($isbn) ?>">
     <div>
       <button type="submit">SUBMIT</button>
@@ -351,6 +347,18 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
 </div>
 
 <script>
+  // Allow only numeric input and max 6 digits for 'days_input'
+  document.getElementById('user_id').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+  });
+
+  // Apply the same logic to all 'other deduction' value inputs
+  document.querySelectorAll('.contact_num').forEach(input => {
+      input.addEventListener('input', function(e) {
+          e.target.value = e.target.value.replace(/\D/g, '').slice(0, 11);
+      });
+  });
+
   function toggleSidebar() {
     document.getElementById("sidebar").classList.toggle("collapsed");
   }
@@ -374,6 +382,23 @@ $pdf_file = htmlspecialchars($book['pdf_file']);
       document.getElementById('successPopup').style.display = 'flex';
     }
   };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.querySelector('input[name="date"]');
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 7);
+
+    const formatDate = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    dateInput.min = formatDate(today);
+    dateInput.max = formatDate(maxDate);
+  });
 </script>
 
 </body>

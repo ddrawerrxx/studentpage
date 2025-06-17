@@ -1,9 +1,9 @@
 <?php
-session_start();
-include('..\dbcon.php');
+  session_start();
+  include('..\dbcon.php');
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ..\login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -45,33 +45,24 @@ foreach ($genres as $genre) {
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
-
     .borrow {
-      background-color: #4CAF50; /* Green */
+      background-color: #4CAF50;
       color: white;
     }
-
     .borrow:hover {
       background-color: #45a049;
     }
-
     .borrowed {
-      background-color: #ccc;  /* Light gray */
+      background-color: #ccc;
       color: #555;
       cursor: not-allowed;
     }
-
-    .btn {
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="logo" onclick="toggleSidebar()">
         <img src="../Images/logo.png" alt="Readly Logo" />
@@ -89,9 +80,7 @@ foreach ($genres as $genre) {
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-      <!-- Header -->
       <header class="header">
         <div class="spacer"></div>
         <div class="header-icons">
@@ -100,47 +89,67 @@ foreach ($genres as $genre) {
         </div>
       </header>
 
-      <!-- Page Content -->
       <section class="content">
         <div class="dashboard-header">
           <h2>Available Books</h2>
         </div>
 
         <div class="search-bar">
-          <input type="text" placeholder="Search" />
+          <input type="text" id="search-input" placeholder="Search by title or author" onkeyup="searchBooks()" />
           <button><img src="../Images/Search.jpg" /></button>
         </div>
 
-        <!-- Loop through each genre -->
-        <?php foreach ($books_by_genre as $genre => $book_list): ?>
-          <div class="book-category">
-            <h3><?php echo htmlspecialchars($genre); ?></h3>
-            <div class="book-row">
-              <?php while ($book = mysqli_fetch_assoc($book_list)): ?>
-                <div class="book-card">
-                  <img src="../Images/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Cover" style="width: 150px; height: 220px; object-fit: cover; border-radius: 8px;" />
-                  <p><?php echo htmlspecialchars($book['title']); ?></p>
-                  <?php if (in_array($book['id'], $borrowed_books)): ?>
-                    <button class="btn borrowed" disabled>Borrowed</button>
-                  <?php else: ?>
-                    <a href="borrow.php?book_id=<?php echo $book['id']; ?>">
-                      <button class="btn borrow">Borrow</button>
-                    </a>
-                  <?php endif; ?>
-
-                </div>
-              <?php endwhile; ?>
+        <div id="book-results">
+          <?php foreach ($books_by_genre as $genre => $book_list): ?>
+            <div class="book-category">
+              <h3><?php echo htmlspecialchars($genre); ?></h3>
+              <div class="book-row">
+                <?php while ($book = mysqli_fetch_assoc($book_list)): ?>
+                  <div class="book-card">
+                    <img src="../Images/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Cover" style="width: 150px; height: 220px; object-fit: cover; border-radius: 8px;" />
+                    <p><?php echo htmlspecialchars($book['title']); ?></p>
+                    <?php if (in_array($book['id'], $borrowed_books)): ?>
+                      <button class="btn borrowed" disabled>Borrowed</button>
+                    <?php else: ?>
+                      <a href="borrow.php?book_id=<?php echo $book['id']; ?>">
+                        <button class="btn borrow">Borrow</button>
+                      </a>
+                    <?php endif; ?>
+                  </div>
+                <?php endwhile; ?>
+              </div>
             </div>
-          </div>
-        <?php endforeach; ?>
+          <?php endforeach; ?>
+        </div>
       </section>
     </main>
   </div>
 
   <script>
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("collapsed");
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+  }
+
+  function searchBooks() {
+    const query = document.getElementById("search-input").value.trim();
+    const xhr = new XMLHttpRequest();
+
+    if (query === "") {
+      // Load full layout again
+      xhr.open("GET", "load_default_books.php", true);
+    } else {
+      // Do normal search
+      xhr.open("GET", "search_books.php?query=" + encodeURIComponent(query), true);
     }
-  </script>
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        document.getElementById("book-results").innerHTML = xhr.responseText;
+      }
+    };
+    xhr.send();
+  }
+</script>
+
 </body>
 </html>

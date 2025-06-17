@@ -2,13 +2,13 @@
 session_start();
 include('../dbcon.php');
 
-if (!isset($_SESSION['user_id']) || !isset($_POST['book_id'])) {
+if (!isset($_SESSION['user_id']) || !isset($_GET['book_id'])) {
     header("Location: ../login.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
-$book_id = $_POST['book_id'];
+$book_id = $_GET['book_id'];
 $borrow_date = date('Y-m-d');
 $due_date = date('Y-m-d', strtotime('+7 days')); // 7-day loan period
 
