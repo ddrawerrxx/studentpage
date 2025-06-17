@@ -30,7 +30,7 @@
         <a href="admindashboard.php" onclick="toggleSidebar()"><img class="icon" src="../Images/dashboard.png" alt="Dashboard Icon" /><span>Dashboard</span></a>
         <a href="AdminBookEdit.php" onclick="toggleSidebar()"><img class="icon" src="../Images/BookDetails.png" alt="Book Edit Icon" /><span>Book Edit</span></a>
         <a href="AdminUserPage.php" onclick="toggleSidebar()"><img class="icon" src="../Images/userpage.png" alt="User Page Icon" /><span>User Page</span></a>
-        <a href="SettingAdmin.php" onclick="toggleSidebar()"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>AccountSettings</span></a>
+        <a href="SettingAdmin.php" onclick="toggleSidebar()"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Account Settings</span></a>
       </nav>
       <div class="sign-out">
         <a href="../logout.php" onclick="toggleSidebar()"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>

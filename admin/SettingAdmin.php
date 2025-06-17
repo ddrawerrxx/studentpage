@@ -103,6 +103,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $birth_date = sprintf("%04d-%02d-%02d", $birth_year, $birth_month, $birth_day);
       }
     }
+    // Age Validation
+    if (!isset($_POST['age']) || $_POST['age'] < 0) {
+        $errors['info']['age'] = 'Age must be a non-negative number.';
+    }
+
+    // Contact Validation
+    if (!isset($_POST['contact']) || !preg_match('/^\d{10,11}$/', $_POST['contact'])) {
+        $errors['info']['contact'] = 'Contact number must be 10 to 11 digits.';
+    }
+
 
     if (empty($errors['info'])) {
       try {
@@ -644,9 +654,10 @@ if (!empty($admin_info_data['birth_date'])) {
 
             <div>
               <label for="age">Age:</label><br>
-              <input type="text" id="age" name="age" placeholder="Age"
+              <input type="number" id="age" name="age" placeholder="Age"
                 class="custom-input <?php echo isset($errors['info']['age']) ? 'error-field' : ''; ?>"
-                value="<?php echo htmlspecialchars($admin_info_data['age'] ?? ''); ?>">
+                value="<?php echo htmlspecialchars($admin_info_data['age'] ?? ''); ?>"
+                min="0" oninput="this.value = Math.abs(this.value);">
               <?php if (isset($errors['info']['age'])): ?>
                 <span class="error"><?php echo htmlspecialchars($errors['info']['age']); ?></span>
               <?php endif; ?>
@@ -659,11 +670,11 @@ if (!empty($admin_info_data['birth_date'])) {
                 value="<?php echo htmlspecialchars($admin_info_data['contact'] ?? ''); ?>"
                 maxlength="11" inputmode="numeric" pattern="\d{10,11}"
                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);">
-
               <?php if (isset($errors['info']['contact'])): ?>
                 <span class="error"><?php echo htmlspecialchars($errors['info']['contact']); ?></span>
               <?php endif; ?>
             </div>
+
 
             <div class="wide">
               <label for="address">Address:</label><br>
