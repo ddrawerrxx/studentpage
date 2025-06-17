@@ -188,6 +188,7 @@ if (!empty($admin_info_data['birth_date'])) {
 
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" href="../Images/logo.png" type="image/png">
   <title>Admin Setting</title>
   <style>
     * {
@@ -503,7 +504,7 @@ if (!empty($admin_info_data['birth_date'])) {
         <a href="admindashboard.php" onclick="toggleSidebar()"><img class="icon" src="../Images/dashboard.png" alt="Dashboard Icon" /><span>Dashboard</span></a>
         <a href="AdminBookEdit.php" onclick="toggleSidebar()"><img class="icon" src="../Images/BookDetails.png" alt="Book Edit Icon" /><span>Book Edit</span></a>
         <a href="AdminUserPage.php" onclick="toggleSidebar()"><img class="icon" src="../Images/userpage.png" alt="User Page Icon" /><span>User Page</span></a>
-        <a href="SettingAdmin.php" onclick="toggleSidebar()"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Settings</span></a>
+        <a href="SettingAdmin.php" onclick="toggleSidebar()"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Account Settings</span></a>
       </nav>
       <div class="sign-out">
         <a href="../logout.php" onclick="toggleSidebar()"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
@@ -514,7 +515,7 @@ if (!empty($admin_info_data['birth_date'])) {
       <header class="header">
         <div class="spacer"></div>
         <div class="header-icons">
-          <img class="icon" src="../Images/notif.png" alt="Notifications">
+          <!-- <img class="icon" src="../Images/notif.png" alt="Notifications"> -->
           <img class="icon" src="../Images/profile.png" alt="Profile">
         </div>
       </header>

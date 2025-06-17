@@ -1,11 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="../Images/logo.png" type="image/png">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="../css/admindashboard.css" />
+  <!-- Add Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Add SweetAlert for notifications -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
   <div class="container">
@@ -13,14 +17,14 @@
       <div class="logo" onclick="toggleSidebar()">
         <img src="../Images/logo.png" alt="Readly Logo" />
       </div>
-      <nav class="nav">
+       <nav class="nav">
         <a href="admindashboard.php" onclick="toggleSidebar()"><img class="icon" src="../Images/dashboard.png" alt="Dashboard Icon" /><span>Dashboard</span></a>
         <a href="AdminBookEdit.php" onclick="toggleSidebar()"><img class="icon" src="../Images/BookDetails.png" alt="Book Edit Icon" /><span>Book Edit</span></a>
         <a href="AdminUserPage.php" onclick="toggleSidebar()"><img class="icon" src="../Images/userpage.png" alt="User Page Icon" /><span>User Page</span></a>
-        <a href="SettingAdmin.php" onclick="toggleSidebar()"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Settings</span></a>      
+        <a href="SettingAdmin.php" onclick="toggleSidebar()"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Account Settings</span></a>      
       </nav>
       <div class="sign-out">
-        <a href="#" onclick="toggleSidebar()"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
+        <a href="../logout.php" onclick="toggleSidebar()"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
       </div>
     </aside>
 
@@ -28,42 +32,35 @@
       <header class="header">
         <div class="spacer"></div>
         <div class="header-icons">
-          <img class="icon" src="../Images/notif.png" alt="Notification Icon">
-          <img class="icon" src="../Images/profile.png" alt="Profile Icon">
+          <a href="SettingAdmin.php"><img class="icon" src="../Images/profile.png"></a>
         </div>
       </header>
 
       <section class="dashboard">
-        <h2 class="dashboard-title">Hello, Admin! <span class="date-time">April 5, 2025 | Saturday, 10:00 AM</span></h2>
+        <h2 class="dashboard-title">Hello, Admin! <span class="date-time" id="currentDateTime"></span></h2>
 
         <div class="dashboard-cards">
           <div class="card">
-            <h3>Books Borrowed</h3>
-            <img src="../Images/borrowed-chart.png" alt="Books Borrowed Chart" class="chart-img" />
-            <p class="card-footer">previous books used: 150 &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; books metrics</p>
+            <h3>Books Statistics</h3>
+            <canvas id="booksChart"></canvas>
+            <p class="card-footer" id="booksFooter"></p>
           </div>
 
           <div class="card">
-            <h3>Pending Overdue</h3>
-            <img src="../Images/overdue.png" alt="Pending Overdue Chart" class="chart-img" />
-            <p><strong>65</strong> Pending Borrow Request</p>
-            <p><strong class="overdue">28</strong> Overdue Returns</p>
+            <h3>Borrowing Status</h3>
+            <canvas id="borrowingChart"></canvas>
+            <div id="borrowingStats"></div>
           </div>
 
           <div class="card wide">
-         <h3>User Activity</h3>
-        <img src="../Images/user-activity.png" alt="User Activity Chart" class="chart-img user-chart" />
-        </div>
+            <h3>Monthly Activity</h3>
+            <canvas id="activityChart" height="200"></canvas>
+          </div>
 
-        <div class="card users">
+          <div class="card users">
             <h3>Top Users</h3>
-            <ul>
-              <li><img src="../Images/user-profile.png" alt="Daniel"> Daniel</li>
-              <li><img src="../Images/user-profile.png" alt="Primo"> Primo</li>
-              <li><img src="../Images/user-profile.png" alt="Georgina"> Georgina</li>
-              <li><img src="../Images/user-profile.png" alt="Mia"> Mia</li>
-              <li><img src="../Images/user-profile.png" alt="Ely"> Ely</li>
-              <li><img src="../Images/user-profile.png" alt="Jackie"> Jackie</li>
+            <ul id="topUsersList">
+              <!-- Will be populated by JavaScript -->
             </ul>
           </div>
         </div>
@@ -71,10 +68,178 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
       sidebar.classList.toggle("collapsed");
+    }
+
+    // Update current date and time
+    function updateDateTime() {
+      const now = new Date();
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000); // Update every minute
+
+    // Fetch data and initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchDashboardData();
+    });
+
+    async function fetchDashboardData() {
+      try {
+        const response = await fetch('getDashboardData.php');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update books statistics
+          createBooksChart(data.booksData);
+          document.getElementById('booksFooter').innerHTML = 
+            `Total books: ${data.totalBooks} &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp; 
+             Available: ${data.availableBooks}`;
+
+          // Update borrowing stats
+          createBorrowingChart(data.borrowingData);
+          document.getElementById('borrowingStats').innerHTML = `
+            <p><strong>${data.pendingRequests}</strong> Pending Borrow Request</p>
+            <p><strong class="overdue">${data.overdueReturns}</strong> Overdue Returns</p>
+          `;
+
+          // Update monthly activity
+          createActivityChart(data.monthlyActivity);
+
+          // Update top users
+          const topUsersList = document.getElementById('topUsersList');
+            topUsersList.innerHTML = data.topUsers.map((user, index) => `
+              <li>
+                <img src="../Images/user-profile.png" alt="${user.fullname}">
+                <span class="name">${user.fullname}</span>
+                <span class="count">${user.booksBorrowed} books</span>
+              </li>
+            `).join('');
+        } else {
+          Swal.fire('Error', 'Failed to load dashboard data', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire('Error', 'An error occurred while loading data', 'error');
+      }
+    }
+
+    function createBooksChart(data) {
+      const ctx = document.getElementById('booksChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Available', 'Borrowed', 'Reserved'],
+          datasets: [{
+            data: [data.available, data.borrowed, data.reserved],
+            backgroundColor: [
+              '#4CAF50',
+              '#FF9800',
+              '#9C27B0'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    function createBorrowingChart(data) {
+      const ctx = document.getElementById('borrowingChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Pending', 'Borrowed', 'Returned', 'Overdue'],
+          datasets: [{
+            label: 'Borrowing Status',
+            data: [data.pending, data.borrowed, data.returned, data.overdue],
+            backgroundColor: [
+              '#FFC107',
+              '#2196F3',
+              '#4CAF50',
+              '#F44336'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    function createActivityChart(data) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const currentMonth = new Date().getMonth();
+      const last6Months = months.slice(Math.max(0, currentMonth - 5), currentMonth + 1);
+      
+      const ctx = document.getElementById('activityChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: last6Months,
+          datasets: [
+            {
+              label: 'Books Borrowed',
+              data: data.borrowed,
+              borderColor: '#2196F3',
+              backgroundColor: 'rgba(33, 150, 243, 0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Books Returned',
+              data: data.returned,
+              borderColor: '#4CAF50',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
     }
   </script>
 </body>
