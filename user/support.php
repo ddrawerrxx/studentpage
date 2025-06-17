@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Support Page</title>
   <link rel="stylesheet" href="../css/support.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    *{
+      
+    font-family: 'Poppins', sans-serif;
+
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -19,7 +27,7 @@
         <a href="Book-Details.php" onclick="toggleSidebar()"><img class="icon" src="../Images\Details.png" alt="Details Icon" /><span>Book Details</span></a>
         <a href="track&record.php" onclick="toggleSidebar()"><img class="icon" src="../Images\Track.png" alt="Track Icon" /><span>Track and Record</span></a>
         <a href="support.php" onclick="toggleSidebar()"><img class="icon" src="../Images\Support.png" alt="Support Icon" /><span>Support Page</span></a>
-        <a href="setting.php" onclick="toggleSidebar()"><img class="icon" src="../Images\settings.png" alt="Settings Icon" /><span>Settings</span></a>       
+        <a href="setting.php" onclick="toggleSidebar()"><img class="icon" src="../Images\settings.png" alt="Settings Icon" /><span>Account Settings</span></a>       
       </nav>
       <div class="sign-out">
       <a href="logout.php"><img class="icon" src="../Images\signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
@@ -33,8 +41,7 @@
       <header class="header">
         <div class="spacer"></div>
         <div class="header-icons">
-          <img class="icon" src="../Images/notif.png" alt="Notifications" />
-          <img class="icon" src="../Images/profile.png" alt="Profile" />
+          <a href="setting.php"><img class="icon" src="../Images/profile.png"></a> 
         </div>
       </header>
 

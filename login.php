@@ -24,9 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           $_SESSION['role'] = $user['role'] ?? 'student';
 
           if ($_SESSION['role'] === 'admin') {
-              header("Location: admin/admindashboard.php");
+              header("Location: admin/admindashboard.php?status=success");
           } else {
-              header("Location: user/homepage.php");
+              header("Location: user/homepage.php?status=success");
           }
           exit();
       } else {
@@ -45,6 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Digital Library</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/3b07bc6295.js" crossorigin="anonymous"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -180,7 +182,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     .toast {
-        background-color: #1BCD80;
+        background-color: #0e3a5d;
         color: white;
         padding: 12px 18px;
         border-radius: 8px;
