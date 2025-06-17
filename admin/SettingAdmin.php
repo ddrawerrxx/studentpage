@@ -191,6 +191,11 @@ if (!empty($admin_info_data['birth_date'])) {
   <link rel="icon" href="../Images/logo.png" type="image/png">
   <title>Admin Setting</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    *{
+      font-family: 'Poppins', sans-serif;
+
+    }
     * {
       margin: 0;
       padding: 0;
