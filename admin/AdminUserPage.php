@@ -10,6 +10,13 @@
   <link rel="stylesheet" href="../css/AdminUserPage.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    *{
+      font-family: 'Poppins', sans-serif;
+
+    }
+</style>
 </head>
 
 <body>
