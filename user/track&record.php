@@ -242,7 +242,25 @@ $borrowedBooksResult = $stmt->get_result();
     outline: none;
     background-color: #fff;
   }
+  .borrowed-table th {
+    background-color: #368DB8;
+    color: white;
+  }
 
+  .stat-card {
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center; /* center text horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* center vertically */
+    border-radius: 8px;
+    min-height: 120px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
 
   </style>
 </head>
