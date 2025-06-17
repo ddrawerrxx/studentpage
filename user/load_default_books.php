@@ -15,7 +15,7 @@ while ($row = mysqli_fetch_assoc($borrowed_result)) {
     $borrowed_books[] = $row['book_id'];
 }
 
-$genres = ['Science Fiction', 'Thriller', 'Romance', 'Fantasy', 'Horror', 'History'];
+$genres = ['Fantasy', 'Fiction', 'Literary Fiction', 'Romance', 'Children', 'Health', 'Self-help', 'Motivational'];
 
 foreach ($genres as $genre) {
     $stmt = $conn->prepare("SELECT * FROM books WHERE category = ?");

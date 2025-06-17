@@ -29,6 +29,14 @@ $result = $conn->query($query);
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Book Details</title>
   <link rel="stylesheet" href="../css/Book-Details.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    *{
+      
+    font-family: 'Poppins', sans-serif;
+
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -42,7 +50,7 @@ $result = $conn->query($query);
         <a href="Book-Details.php"><img class="icon" src="../Images/Details.png" alt="Details Icon" /><span>Book Details</span></a>
         <a href="track&record.php"><img class="icon" src="../Images/Track.png" alt="Track Icon" /><span>Track and Record</span></a>
         <a href="support.php"><img class="icon" src="../Images/Support.png" alt="Support Icon" /><span>Support Page</span></a>
-        <a href="setting.php"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Settings</span></a>       
+        <a href="setting.php"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Account Settings</span></a>       
       </nav>
       <div class="sign-out">
         <a href="../logout.php"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
@@ -53,8 +61,7 @@ $result = $conn->query($query);
       <header class="header">
         <div class="spacer"></div>
         <div class="header-icons">
-          <img class="icon" src="../Images/notif.png" />
-          <img class="icon" src="../Images/profile.png" />
+          <a href="setting.php"><img class="icon" src="../Images/profile.png"></a> 
         </div>
       </header>
 
@@ -70,7 +77,6 @@ $result = $conn->query($query);
               <div class="action-buttons">
                 <form method="post" action="borrow.php">
                   <input type="hidden" name="book_id" value="<?php echo $book['id']; ?>">
-                  <button type="submit" class="borrow-btn">Borrow</button>
                 </form>
                 <a href="read.php?id=<?php echo $book['id']; ?>" class="read-btn">Read</a>
               </div>

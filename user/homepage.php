@@ -13,6 +13,8 @@ $query = "SELECT * FROM users WHERE id = $user_id LIMIT 1";
 $result = mysqli_query($conn, $query);
 $user = mysqli_fetch_assoc($result);
 
+$user_name = $user['fullname'];
+
 // Statistics
 $borrowed_count = 0;
 $overdue_count = 0;
@@ -36,13 +38,17 @@ if ($read_result = mysqli_query($conn, $read_query)) {
     $read_count = $row['total'];
 }
 
-// Random featured book
+// Featured Book
 $featured_query = "SELECT * FROM books ORDER BY RAND() LIMIT 1";
 $featured_result = mysqli_query($conn, $featured_query);
 $featured_book = mysqli_fetch_assoc($featured_result);
 
-// Recommended books
+// Recommended Books
 $recommended = mysqli_query($conn, "SELECT * FROM books ORDER BY RAND() LIMIT 6");
+
+// Top Books (Dynamic Table)
+$top_books_query = "SELECT * FROM books ORDER BY views DESC LIMIT 6";
+$top_books_result = mysqli_query($conn, $top_books_query);
 ?>
 
 <!DOCTYPE html>
@@ -50,10 +56,16 @@ $recommended = mysqli_query($conn, "SELECT * FROM books ORDER BY RAND() LIMIT 6"
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>User homepage</title>
+  <title>User Homepage</title>
   <link rel="stylesheet" href="../css/homepage.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/3b07bc6295.js" crossorigin="anonymous"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    *{
+      font-family: 'Poppins', sans-serif;
+
+    }
     .featured-book .featured-img {
       width: 180px;
       height: 280px;
@@ -61,16 +73,98 @@ $recommended = mysqli_query($conn, "SELECT * FROM books ORDER BY RAND() LIMIT 6"
       border-radius: 12px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
     .featured-book .featured-img:hover {
       transform: scale(1.05);
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       cursor: pointer;
+    }
+
+    .borrowed-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .borrowed-table thead {
+      background-color: #368DB8;
+      color: white;
+    }
+
+    .borrowed-table th{
+      background-color: #3498db;
+    }
+
+    .borrowed-table th, .borrowed-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+      color: #333;
+    }
+
+    .borrowed-table tbody tr {
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .borrowed-table tbody tr:hover {
+      background-color: #e9f5ff;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.06);
+    }
+    #toastBox {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        background-color: #0e3a5d;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        min-width: 200px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    }
+
+    .toast.error {
+        background-color: #e74c3c;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
     }
   </style>
 </head>
 
 <body>
 <div class="container">
+  <div id="toastBox"></div>
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="logo" onclick="toggleSidebar()">
@@ -82,18 +176,18 @@ $recommended = mysqli_query($conn, "SELECT * FROM books ORDER BY RAND() LIMIT 6"
       <a href="Book-Details.php"><img class="icon" src="../Images/Details.png" alt="Details Icon" /><span>Book Details</span></a>
       <a href="track&record.php"><img class="icon" src="../Images/Track.png" alt="Track Icon" /><span>Track and Record</span></a>
       <a href="support.php"><img class="icon" src="../Images/Support.png" alt="Support Icon" /><span>Support Page</span></a>
-      <a href="setting.php"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Settings</span></a>
+      <a href="setting.php"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Account Settings</span></a>
     </nav>
     <div class="sign-out">
       <a href="../logout.php"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
+    </div>
   </aside>
 
   <main class="main-content">
     <header class="header">
       <div class="spacer"></div>
       <div class="header-icons">
-        <img class="icon" src="../Images/notif.png">
-        <img class="icon" src="../Images/profile.png">
+       <a href="setting.php"><img class="icon" src="../Images/profile.png"></a> 
       </div>
     </header>
 
@@ -109,22 +203,26 @@ $recommended = mysqli_query($conn, "SELECT * FROM books ORDER BY RAND() LIMIT 6"
         <div class="card"><?php echo $read_count; ?><br><span>Total Book Read</span></div>
       </div>
 
+      <!-- Top Books Table (Dynamic) -->
       <div class="top-books">
-        <table>
+        <table class="borrowed-table">
           <thead>
-            <tr><th>#</th><th>Title</th><th>Author</th><th>Views</th></tr>
+      
+            <tr><th style="color: #ffff;">#</th><th style="color: #ffff;">Title</th style="color: #ffff;"><th style="color: #ffff;">Author</th><th style="color: #ffff;">Views</th></tr>
           </thead>
           <tbody>
-            <tr><td>1</td><td>Noli Me Tangere</td><td>Jose Rizal</td><td>200</td></tr>
-            <tr><td>2</td><td>The Book Thief</td><td>Markus Zusak</td><td>100</td></tr>
-            <tr><td>3</td><td>The Alchemist</td><td>Paulo Coelho</td><td>100</td></tr>
-            <tr><td>4</td><td>Unlock Your Potential</td><td>Jeff Lerner</td><td>100</td></tr>
-            <tr><td>5</td><td>The Power of Now</td><td>Eckhart Tolle</td><td>100</td></tr>
-            <tr><td>6</td><td>El Filibusterismo</td><td>Jose Rizal</td><td>300</td></tr>
+            <?php $i = 1; while ($book = mysqli_fetch_assoc($top_books_result)): ?>
+              <tr>
+                <td><?php echo $i++; ?></td>
+                <td><?php echo htmlspecialchars($book['title']); ?></td>
+                <td><?php echo htmlspecialchars($book['author']); ?></td>
+                <td><?php echo $book['views']; ?></td>
+              </tr>
+            <?php endwhile; ?>
           </tbody>
         </table>
 
-        <!-- Featured Book -->
+        <!-- Featured Book Section -->
         <div class="featured-book">
           <img class="featured-img" src="../Images/<?php echo htmlspecialchars($featured_book['cover_image']); ?>" alt="<?php echo htmlspecialchars($featured_book['title']); ?>">
           <div class="book-desc">
@@ -205,6 +303,35 @@ function fetchBookDetails(bookId) {
 function closeModal() {
   document.getElementById("bookModal").style.display = "none";
 }
+
+  let userr_name = <?php echo json_encode($user_name); ?>;
+  let toastBox = document.getElementById('toastBox');
+  let successMess = '<i class="fa-solid fa-circle-check"></i> Welcome ' + userr_name + '!';
+
+  function showToast(msg) {
+      let toast = document.createElement('div'); 
+      toast.classList.add('toast');
+      toast.innerHTML = msg;
+      toastBox.appendChild(toast); 
+
+      if (msg.includes('error')) {
+          toast.classList.add('error');
+      }
+
+      // Play notification sound
+      const sound = document.getElementById('notifySound');
+      if (sound) sound.play();
+
+      setTimeout(() => {
+          toast.remove();
+      }, 3000);
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('status') === 'success') {
+      showToast(successMess);
+      window.history.replaceState(null, null, window.location.pathname);
+  }
 </script>
 
 </body>

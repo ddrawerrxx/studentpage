@@ -1,6 +1,9 @@
 <?php
-  session_start();
-  include('..\dbcon.php');
+session_start();
+$success = $_SESSION['success'] ?? '';
+unset($_SESSION['success']);
+
+include('..\dbcon.php');
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
@@ -17,7 +20,8 @@ while ($row = mysqli_fetch_assoc($borrowed_result)) {
 }
 
 // Fetch books by genre
-$genres = ['Science Fiction', 'Thriller', 'Romance', 'Fantasy', 'Horror', 'History'];
+// Fetch books by genre
+$genres = ['Fantasy', 'Fiction', 'Literary Fiction', 'Romance', 'Children', 'Health', 'Self-help', 'Motivational'];
 $books_by_genre = [];
 
 foreach ($genres as $genre) {
@@ -27,6 +31,7 @@ foreach ($genres as $genre) {
     $result = $stmt->get_result();
     $books_by_genre[$genre] = $result;
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -59,6 +64,64 @@ foreach ($genres as $genre) {
       color: #555;
       cursor: not-allowed;
     }
+    /* Popup styling */
+    #borrowPopup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .borrow-form {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      width: 400px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .borrow-form img {
+      width: 80px;
+      margin-bottom: 15px;
+    }
+
+    .borrow-form h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .borrow-form input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .borrow-form button {
+      width: 120px;
+      padding: 10px;
+      margin: 10px 5px 0;
+      background-color: #0e3a5d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .borrow-form button:hover {
+      background-color: #12476f;
+    }
+
   </style>
 </head>
 <body>
@@ -73,7 +136,7 @@ foreach ($genres as $genre) {
         <a href="Book-Details.php"><img class="icon" src="../Images/Details.png" /><span>Book Details</span></a>
         <a href="track&record.php"><img class="icon" src="../Images/Track.png" /><span>Track and Record</span></a>
         <a href="support.php"><img class="icon" src="../Images/Support.png" /><span>Support Page</span></a>
-        <a href="setting.php"><img class="icon" src="../Images/settings.png" /><span>Settings</span></a>
+        <a href="setting.php"><img class="icon" src="../Images/settings.png" /><span>Account Settings</span></a>
       </nav>
       <div class="sign-out">
         <a href="../logout.php"><img class="icon" src="../Images/signout.png" /><span>Sign Out</span></a>
@@ -84,8 +147,7 @@ foreach ($genres as $genre) {
       <header class="header">
         <div class="spacer"></div>
         <div class="header-icons">
-          <img class="icon" src="../Images/notif.png" />
-          <img class="icon" src="../Images/profile.png" />
+          <a href="setting.php"><img class="icon" src="../Images/profile.png"></a> 
         </div>
       </header>
 
@@ -111,9 +173,7 @@ foreach ($genres as $genre) {
                     <?php if (in_array($book['id'], $borrowed_books)): ?>
                       <button class="btn borrowed" disabled>Borrowed</button>
                     <?php else: ?>
-                      <a href="borrow.php?book_id=<?php echo $book['id']; ?>">
-                        <button class="btn borrow">Borrow</button>
-                      </a>
+                      <button class="btn borrow" onclick="openBorrowForm('<?php echo htmlspecialchars($book['title']); ?>', '<?php echo $book['id']; ?>')">Borrow</button>
                     <?php endif; ?>
                   </div>
                 <?php endwhile; ?>
@@ -124,6 +184,38 @@ foreach ($genres as $genre) {
       </section>
     </main>
   </div>
+
+  <!-- Borrow Popup -->
+  <div id="borrowPopup" style="display:none;">
+    <form class="borrow-form" action="submit_borrow.php" method="POST">
+      <img src="../Images/logo.png" alt="Readly" />
+      <h2>Fill up the following</h2>
+      <input type="text" id="user_id" name="user_id" value="<?= $_SESSION['user_id'] ?>" readonly>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="text" name="book_title" id="bookTitle" placeholder="Book Title" readonly>
+      <label for="borrow-date" style="display:block; margin-top: 10px; font-weight: bold;">Select return date (max 7 days)</label>
+      <input type="date" id="borrow-date" name="date" required>
+      <input type="text" name="contact" class="contact_num" placeholder="Contact" required>
+      <input type="hidden" name="book_id" id="bookId">
+      <div>
+        <button type="submit">SUBMIT</button>
+        <button type="button" onclick="closeBorrowForm()">CANCEL</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Success Popup -->
+  <?php if (isset($_GET['borrowed']) && $_GET['borrowed'] == 1): ?>
+    <div id="successPopup" style="display:flex;">
+      <div class="success-box">
+        <img src="../Images/success-icon.png" alt="Success" />
+        <h2>SUCCESSFUL</h2>
+        <p>Your request is under review. Kindly wait for approval.</p>
+        <button onclick="closeSuccessPopup()">Continue</button>
+      </div>
+    </div>
+  <?php endif; ?>
+
 
   <script>
   function toggleSidebar() {
@@ -149,7 +241,70 @@ foreach ($genres as $genre) {
     };
     xhr.send();
   }
+  function openBorrowForm(title, bookId) {
+    document.getElementById('bookTitle').value = title;
+    document.getElementById('bookId').value = bookId;
+    document.getElementById('borrowPopup').style.display = 'flex';
+  }
+
+  function closeBorrowForm() {
+    document.getElementById('borrowPopup').style.display = 'none';
+  }
+
+  function closeSuccessPopup() {
+    document.getElementById('successPopup').style.display = 'none';
+  }
+
+  // Allow numeric contact only
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.contact_num').forEach(input => {
+      input.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 11);
+      });
+    });
+
+    const dateInput = document.getElementById('borrow-date');
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 7);
+
+    const formatDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    dateInput.min = formatDate(today);
+    dateInput.max = formatDate(maxDate);
+  });
+
+  function openBorrowForm(title, bookId) {
+    // Fill the modal form
+    document.getElementById('bookTitle').value = title;
+    document.getElementById('bookId').value = bookId;
+    document.getElementById('borrowPopup').style.display = 'flex';
+
+    // Send AJAX request to increment view count
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "increment_view.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("book_id=" + encodeURIComponent(bookId));
+  }
+
+  
 </script>
+  <!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php if (!empty($success)): ?>
+  <script>
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: <?php echo json_encode($success); ?>,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    });
+  </script>
+<?php endif; ?>
+
 
 </body>
 </html>

@@ -16,6 +16,9 @@ if (!$book) {
     exit;
 }
 
+// Increment view count
+mysqli_query($conn, "UPDATE books SET views = views + 1 WHERE id = '$isbn'");
+
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +26,6 @@ if (!$book) {
 <head>
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($book['title']) ?> - Read</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -286,12 +288,12 @@ if (!$book) {
       <a href="homepage.php"><img class="icon" src="../Images/dashboard.png" alt="Dashboard Icon" /><span>Dashboard</span></a>
       <a href="librarypage.php"><img class="icon" src="../Images/Library.png" alt="Library Icon" /><span>Library</span></a>
       <a href="Book-Details.php"><img class="icon" src="../Images/Details.png" alt="Details Icon" /><span>Book Details</span></a>
-      <a href="track.php"><img class="icon" src="../Images/Track.png" alt="Track Icon" /><span>Track and Record</span></a>
+      <a href="track&record.php"><img class="icon" src="../Images/Track.png" alt="Track Icon" /><span>Track and Record</span></a>
       <a href="support.php"><img class="icon" src="../Images/Support.png" alt="Support Icon" /><span>Support Page</span></a>
-      <a href="settings.php"><img class="icon" src="../Images/Settings.png" alt="Settings Icon" /><span>Settings</span></a>       
+      <a href="settings.php"><img class="icon" src="../Images/Settings.png" alt="Settings Icon" /><span>Account Settings</span></a>       
     </nav>
     <div class="sign-out">
-      <a href="logout.php"><img class="icon" src="/Images/signout.png" alt="Sign Out Icon" /><span>Sign Out</span></a>
+      <a href="logout.php"><img class="icon" src="../Images/signout.png" alt="Sign Out Icon" /><span>Sign Out</span></a>
     </div>
   </aside>
 
@@ -300,7 +302,7 @@ if (!$book) {
     <div class="topbar">
       <div class="left"><span>READLY</span></div>
       <div class="right">
-        <img src="../Images/profile.png" alt="Profile">
+        <a href="setting.php"><img class="icon" src="../Images/profile.png"></a> 
       </div>
     </div>
 
