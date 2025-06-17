@@ -1,5 +1,6 @@
 <?php
-include 'db_connect.php';
+include('..\dbcon.php');
+
 
 $isbn = $_GET['id'] ?? '';
 $isbn = mysqli_real_escape_string($conn, $isbn);

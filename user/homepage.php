@@ -85,8 +85,7 @@ $recommended = mysqli_query($conn, "SELECT * FROM books ORDER BY RAND() LIMIT 6"
       <a href="setting.php"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Settings</span></a>
     </nav>
     <div class="sign-out">
-      <a href="..\logout.php"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
-    </div>
+      <a href="../logout.php"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
   </aside>
 
   <main class="main-content">

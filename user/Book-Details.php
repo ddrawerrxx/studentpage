@@ -45,7 +45,7 @@ $result = $conn->query($query);
         <a href="setting.php"><img class="icon" src="../Images/settings.png" alt="Settings Icon" /><span>Settings</span></a>       
       </nav>
       <div class="sign-out">
-        <a href="logout.php"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
+        <a href="../logout.php"><img class="icon" src="../Images/signout.png" alt="Signout Icon" /><span>Sign Out</span></a>
       </div>
     </aside>
 

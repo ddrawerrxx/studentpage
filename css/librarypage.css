@@ -192,3 +192,32 @@ body, html {
 .book-row a:hover img {
   transform: scale(1.05); /* slight zoom on hover */
 }
+
+.btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.borrow {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.borrow:hover {
+  background-color: #45a049;
+}
+
+.borrowed {
+  background-color: #ccc;  /* Light gray */
+  color: #555;
+  cursor: not-allowed;
+}
+
+.btn {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}

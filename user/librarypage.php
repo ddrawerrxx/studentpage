@@ -36,6 +36,38 @@ foreach ($genres as $genre) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Library</title>
   <link rel="stylesheet" href="../css/librarypage.css" />
+  <style>
+    .btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .borrow {
+      background-color: #4CAF50; /* Green */
+      color: white;
+    }
+
+    .borrow:hover {
+      background-color: #45a049;
+    }
+
+    .borrowed {
+      background-color: #ccc;  /* Light gray */
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    .btn {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+
+  </style>
 </head>
 <body>
   <div class="container">
@@ -86,13 +118,16 @@ foreach ($genres as $genre) {
             <div class="book-row">
               <?php while ($book = mysqli_fetch_assoc($book_list)): ?>
                 <div class="book-card">
-                  <img src="uploads/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Cover" />
+                  <img src="../Images/<?php echo htmlspecialchars($book['cover_image']); ?>" alt="Cover" style="width: 150px; height: 220px; object-fit: cover; border-radius: 8px;" />
                   <p><?php echo htmlspecialchars($book['title']); ?></p>
                   <?php if (in_array($book['id'], $borrowed_books)): ?>
-                    <button disabled>Borrowed</button>
+                    <button class="btn borrowed" disabled>Borrowed</button>
                   <?php else: ?>
-                    <a href="borrow.php?book_id=<?php echo $book['id']; ?>"><button>Borrow</button></a>
+                    <a href="borrow.php?book_id=<?php echo $book['id']; ?>">
+                      <button class="btn borrow">Borrow</button>
+                    </a>
                   <?php endif; ?>
+
                 </div>
               <?php endwhile; ?>
             </div>

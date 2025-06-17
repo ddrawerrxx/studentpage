@@ -35,7 +35,7 @@ $currentQuery->close();
 
 // Fetch reading progress (get latest month progress)
 $month = date('m-Y');
-$progressQuery = $conn->prepare("SELECT books_read, total_books_goal FROM reading_progress WHERE user_id = ? AND month_year = ?");
+$progressQuery = $conn->prepare("SELECT * FROM borrowed_books WHERE user_id = ? AND due_date = ?");
 $progressQuery->bind_param("is", $user_id, $month);
 $progressQuery->execute();
 $progressResult = $progressQuery->get_result();
